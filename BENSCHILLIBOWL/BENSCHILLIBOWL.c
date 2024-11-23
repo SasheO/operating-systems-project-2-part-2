@@ -37,16 +37,20 @@ BENSCHILLIBOWL* OpenRestaurant(int max_size, int expected_num_orders) {
       perror("Memory not allocated.\n");
       exit(1);
     }
-    if (pthread_mutex_init(&bcb->mutex, NULL) != 0) { 
-        perror("\n mutex init has failed\n"); 
-      exit(1);
-    } 
     bcb->max_size=max_size;
     bcb->expected_num_orders=expected_num_orders;
     bcb->orders_handled=0;
     bcb->current_size=0;
     bcb->next_order_number=1;
-    // TODO: initialize pthread_cond_t can_add_orders, can_get_orders. verify that mutex is initialized right
+    // TODO: verify that mutex and condition variables are initiated right way
+    if (pthread_mutex_init(&bcb->mutex, NULL) != 0) { 
+        perror("mutex init has failed\n"); 
+      exit(1);
+    } 
+    if (pthread_cond_init(&bcb->can_add_orders, NULL) != 0 ||pthread_cond_init(&bcb->can_get_orders, NULL) != 0){
+      perror("pthread_ init has failed\n"); 
+      exit(1);
+    }
     return bcb;
 }
 
