@@ -4,6 +4,17 @@
 
 #include "BENSCHILLIBOWL.h"
 
+/*
+bcb can take 100 customers at a time 
+10 fixed threads for the cooks
+customers come in, place one order after another.
+	- can only come in when less than 100 indoors 
+	- place one order after another
+when a cook is free, they get the order.
+	- reduce queue (needs mutex for synchronization)
+	- increment orders represented (needs mutex for synchronization)
+*/
+
 // Feel free to play with these numbers! This is a great way to
 // test your implementation.
 #define BENSCHILLIBOWL_SIZE 100
@@ -23,7 +34,14 @@ BENSCHILLIBOWL *bcb;
  *  - add their order to the restaurant.
  */
 void* BENSCHILLIBOWLCustomer(void* tid) {
+  // TODO: create thread 
     int customer_id = (int)(long) tid;
+    Order *customer_orders[ORDERS_PER_CUSTOMER];
+    int i;
+    for (i=0;i<ORDERS_PER_CUSTOMER;i++){
+      customer_orders[i]->menu_item = PickRandomMenuItem();
+      customer_orders[i]->customer_id = customer_id;
+    }
 	return NULL;
 }
 
