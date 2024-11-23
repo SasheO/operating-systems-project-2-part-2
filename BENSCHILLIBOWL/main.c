@@ -26,6 +26,11 @@ when a cook is free, they get the order.
 // Global variable for the restaurant.
 BENSCHILLIBOWL *bcb;
 
+// Global variable for the customers (represented each as threads)
+pthread_t customer_threads[NUM_CUSTOMERS]; // threads that will hold customers. at most BENSCHILLIBOWL_SIZE
+pthread_t cook_threads[NUM_COOKS]; // threads that will hold customers. at most BENSCHILLIBOWL_SIZE
+
+
 /**
  * Thread funtion that represents a customer. A customer should:
  *  - allocate space (memory) for an order.
@@ -36,12 +41,15 @@ BENSCHILLIBOWL *bcb;
 void* BENSCHILLIBOWLCustomer(void* tid) {
   // TODO: create thread 
     int customer_id = (int)(long) tid;
+    
     Order *customer_orders[ORDERS_PER_CUSTOMER];
     int i;
     for (i=0;i<ORDERS_PER_CUSTOMER;i++){
       customer_orders[i]->menu_item = PickRandomMenuItem();
       customer_orders[i]->customer_id = customer_id;
     }
+
+    // TODO: check if BENSCHILLIBOWL_SIZE not reached (isFull?) in terms of order before adding orders one after another here
 	return NULL;
 }
 
@@ -56,6 +64,7 @@ void* BENSCHILLIBOWLCustomer(void* tid) {
 void* BENSCHILLIBOWLCook(void* tid) {
     int cook_id = (int)(long) tid;
 	int orders_fulfilled = 0;
+  // TODO: check if any orders to take. take it (lock it?). increment orders taken.
 	printf("Cook #%d fulfilled %d orders\n", cook_id, orders_fulfilled);
 	return NULL;
 }
@@ -68,18 +77,29 @@ void* BENSCHILLIBOWLCook(void* tid) {
  *  - close the restaurant.
  */
 int main() {
+  int customer_id, cook_id;
 	bcb = OpenRestaurant(BENSCHILLIBOWL_SIZE, EXPECTED_NUM_ORDERS); 
-	printf("bcb->max_size: %d\n", bcb->max_size);
-	printf("bcb->expected_num_orders: %d\n", bcb->expected_num_orders);
-	Order *order = malloc(sizeof(Order));
-	order->menu_item = "Tacos";
-	AddOrder(bcb, order);
-	order = malloc(sizeof(Order));
-	order->menu_item = "Fish";
-	AddOrder(bcb, order);
-	order = GetOrder(bcb);
-	PrintOrders(bcb);
-	printf("%s\n", order->menu_item);
+  for (cook_id=0; cook_id<NUM_COOKS; cook_id++){
+    pthread_create(&cook_threads[cook_id], NULL, BENSCHILLIBOWLCook, &cook_id); // pass targetCellAddrs[i] into given func such as computeSumCell to carry out the computation (sum) on the cell
+  }
+  for (customer_id=0; customer_id<NUM_CUSTOMERS; customer_id++){
+    pthread_create(&customer_threads[customer_id], NULL, BENSCHILLIBOWLCook, &customer_id); // pass targetCellAddrs[i] into given func such as computeSumCell to carry out the computation (sum) on the cell    
+  }
+
+  // TODO check if any free cook?
+    // pthread_join(threads[thread_indx], NULL); // wait for thread to finish
+
+	// printf("bcb->max_size: %d\n", bcb->max_size);
+	// printf("bcb->expected_num_orders: %d\n", bcb->expected_num_orders);
+	// Order *order = malloc(sizeof(Order));
+	// order->menu_item = "Tacos";
+	// AddOrder(bcb, order);
+	// order = malloc(sizeof(Order));
+	// order->menu_item = "Fish";
+	// AddOrder(bcb, order);
+	// order = GetOrder(bcb);
+	// PrintOrders(bcb);
+	// printf("%s\n", order->menu_item);
 	free(bcb); // TODO: free bcb, free orders and all other dynamically allocated memory
   return 0;
 }
