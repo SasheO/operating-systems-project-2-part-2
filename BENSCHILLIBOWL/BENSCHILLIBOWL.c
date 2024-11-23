@@ -2,7 +2,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include <time.h>
+#include <time.h> 
 
 bool IsEmpty(BENSCHILLIBOWL* bcb);
 bool IsFull(BENSCHILLIBOWL* bcb);
@@ -24,7 +24,9 @@ int BENSCHILLIBOWLMenuLength = 10;
 
 /* Select a random item from the Menu and return it */
 MenuItem PickRandomMenuItem() {
-    return NULL;
+    srandom(time(NULL));
+    int menu_item_index = random()%BENSCHILLIBOWLMenuLength;
+    return BENSCHILLIBOWLMenu[menu_item_index];
 }
 
 /* Allocate memory for the Restaurant, then create the mutex and condition variables needed to instantiate the Restaurant */

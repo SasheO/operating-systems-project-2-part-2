@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdlib.h>
 
 // Let a menu item be a string.
 typedef char* MenuItem;
