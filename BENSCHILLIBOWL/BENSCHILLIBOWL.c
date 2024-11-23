@@ -38,6 +38,7 @@ BENSCHILLIBOWL* OpenRestaurant(int max_size, int expected_num_orders) {
       exit(1);
     }
     bcb->max_size=max_size;
+    bcb->orders = NULL;
     bcb->expected_num_orders=expected_num_orders;
     bcb->orders_handled=0;
     bcb->current_size=0;
@@ -63,12 +64,33 @@ void CloseRestaurant(BENSCHILLIBOWL* bcb) {
 
 /* add an order to the back of queue */
 int AddOrder(BENSCHILLIBOWL* bcb, Order* order) {
-    return -1;
+  /*
+  return 0 if successfully added
+  */
+  Order *curr = bcb->orders;
+  if (curr==NULL){ // edge case where list is empty
+    bcb->orders = order;
+    return 0;
+  }
+
+  while (curr->next != NULL){
+    curr = curr->next;
+  }      
+  curr->next = order;
+    return 0;
 }
 
 /* remove an order from the queue */
 Order *GetOrder(BENSCHILLIBOWL* bcb) {
+  Order *curr = bcb->orders;
+  if (curr==NULL){ // edge case where list is empty
     return NULL;
+  }
+  else{
+    bcb->orders = curr->next;
+    return curr;
+  }
+
 }
 
 // Optional helper functions (you can implement if you think they would be useful)
