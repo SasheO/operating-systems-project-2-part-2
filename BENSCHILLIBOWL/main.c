@@ -47,7 +47,6 @@ void* BENSCHILLIBOWLCustomer(void* tid) {
     for (i=0;i<ORDERS_PER_CUSTOMER;i++){
       customer_orders[i].menu_item = PickRandomMenuItem();
       customer_orders[i].customer_id = *customer_id;
-      printf("Customer id %d placing %s\n", customer_orders[i].customer_id, customer_orders[i].menu_item);
     }
 
     // TODO: check if BENSCHILLIBOWL_SIZE not reached (isFull?) in terms of order before adding orders one after another here
@@ -101,17 +100,17 @@ int main() {
   // TODO check if any free cook?
     // pthread_join(threads[thread_indx], NULL); // wait for thread to finish
 
-	printf("bcb->max_size: %d\n", bcb->max_size);
-	printf("bcb->expected_num_orders: %d\n", bcb->expected_num_orders);
-	Order *order = malloc(sizeof(Order));
-	order->menu_item = "Tacos";
-	AddOrder(bcb, order);
-	order = malloc(sizeof(Order));
-	order->menu_item = "Fish";
-	AddOrder(bcb, order);
-	order = GetOrder(bcb);
-	PrintOrders(bcb);
-	printf("%s\n", order->menu_item);
+	// printf("bcb->max_size: %d\n", bcb->max_size);
+	// printf("bcb->expected_num_orders: %d\n", bcb->expected_num_orders);
+	Order *order;
+  order = (Order*) malloc(2*sizeof(Order));
+	order[1].menu_item = "Tacos";
+	AddOrder(bcb, &order[1]);
+	order[0].menu_item = "Fish";
+	// AddOrder(bcb, &order[0]);
+	// order = GetOrder(bcb);
+	// PrintOrders(bcb);
+	// printf("%s\n", order->menu_item);
 
   CloseRestaurant(bcb);
  

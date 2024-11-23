@@ -63,12 +63,16 @@ void CloseRestaurant(BENSCHILLIBOWL* bcb) {
   // free all orders
   Order *next;
   Order *prev = bcb->orders;
-  while (prev!=NULL){ 
+  
+  while (prev!=NULL){
+    printf("%s\n", prev->menu_item); 
     next = prev->next;
     free(prev);
+    prev = NULL;
     prev = next;
   }
   free(bcb);
+  // bcb = NULL;
   printf("Restaurant is closed!\n");
 }
 
@@ -85,7 +89,8 @@ int AddOrder(BENSCHILLIBOWL* bcb, Order* order) {
 
   while (curr->next != NULL){
     curr = curr->next;
-  }      
+  }   
+  
   curr->next = order;
     return 0;
 }
