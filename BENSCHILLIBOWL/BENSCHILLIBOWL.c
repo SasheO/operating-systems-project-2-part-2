@@ -1,5 +1,4 @@
 #include "BENSCHILLIBOWL.h"
-
 #include <assert.h>
 #include <stdlib.h>
 #include <time.h> 
@@ -24,8 +23,8 @@ int BENSCHILLIBOWLMenuLength = 10;
 
 /* Select a random item from the Menu and return it */
 MenuItem PickRandomMenuItem() {
-    srandom(time(NULL));
-    int menu_item_index = random()%BENSCHILLIBOWLMenuLength;
+    srand(time(NULL));
+    int menu_item_index = rand()%BENSCHILLIBOWLMenuLength;
     return BENSCHILLIBOWLMenu[menu_item_index];
 }
 
@@ -33,7 +32,22 @@ MenuItem PickRandomMenuItem() {
 
 BENSCHILLIBOWL* OpenRestaurant(int max_size, int expected_num_orders) {
     printf("Restaurant is open!\n");
-    return NULL;
+    BENSCHILLIBOWL *bcb = malloc(sizeof(BENSCHILLIBOWL));
+    if (bcb == NULL) {
+      perror("Memory not allocated.\n");
+      exit(1);
+    }
+    if (pthread_mutex_init(&bcb->mutex, NULL) != 0) { 
+        perror("\n mutex init has failed\n"); 
+      exit(1);
+    } 
+    bcb->max_size=max_size;
+    bcb->expected_num_orders=expected_num_orders;
+    bcb->orders_handled=0;
+    bcb->current_size=0;
+    bcb->next_order_number=1;
+    // TODO: initialize pthread_cond_t can_add_orders, can_get_orders. verify that mutex is initialized right
+    return bcb;
 }
 
 

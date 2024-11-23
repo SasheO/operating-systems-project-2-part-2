@@ -41,7 +41,7 @@ void* BENSCHILLIBOWLCook(void* tid) {
 	printf("Cook #%d fulfilled %d orders\n", cook_id, orders_fulfilled);
 	return NULL;
 }
-
+ 
 /**
  * Runs when the program begins executing. This program should:
  *  - open the restaurant
@@ -50,5 +50,9 @@ void* BENSCHILLIBOWLCook(void* tid) {
  *  - close the restaurant.
  */
 int main() {
-    return 0;
+	bcb = OpenRestaurant(BENSCHILLIBOWL_SIZE, EXPECTED_NUM_ORDERS); 
+	printf("bcb->max_size: %d\n", bcb->max_size);
+	printf("bcb->expected_num_orders: %d\n", bcb->expected_num_orders);
+	free(bcb);
+  return 0;
 }

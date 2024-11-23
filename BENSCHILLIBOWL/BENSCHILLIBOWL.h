@@ -39,7 +39,7 @@ typedef struct Restaurant {
     int orders_handled;
 	int expected_num_orders;
     pthread_mutex_t mutex;
-    pthread_cond_t can_add_orders, can_get_orders;
+    pthread_cond_t can_add_orders, can_get_orders; // check here: https://stackoverflow.com/questions/14924469/does-pthread-cond-waitcond-t-mutex-unlock-and-then-lock-the-mutex
 } BENSCHILLIBOWL;
 
 /**
