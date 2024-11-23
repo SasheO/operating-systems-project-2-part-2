@@ -70,15 +70,15 @@ int AddOrder(BENSCHILLIBOWL* bcb, Order* order) {
   /*
   return 0 if successfully added
   */
-  Order *curr = bcb->orders;
-  if (curr==NULL){ // edge case where list is empty
+  Order * curr = bcb->orders;
+  if (curr == NULL){
     bcb->orders = order;
     return 0;
   }
 
-  while (curr->next != NULL){
+  while (curr->next!=NULL){
     curr = curr->next;
-  }   
+  }
   
   curr->next = order;
     return 0;

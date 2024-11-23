@@ -47,6 +47,7 @@ void* BENSCHILLIBOWLCustomer(void* tid) {
     for (i=0;i<ORDERS_PER_CUSTOMER;i++){
       customer_orders[i].menu_item = PickRandomMenuItem();
       customer_orders[i].customer_id = *customer_id;
+      customer_orders[i].next = NULL;
     }
 
     // TODO: check if BENSCHILLIBOWL_SIZE not reached (isFull?) in terms of order before adding orders one after another here
@@ -102,14 +103,21 @@ int main() {
 
 	// printf("bcb->max_size: %d\n", bcb->max_size);
 	// printf("bcb->expected_num_orders: %d\n", bcb->expected_num_orders);
-	Order *order;
-  order = (Order*) malloc(2*sizeof(Order));
-	order[1].menu_item = "Tacos";
-	AddOrder(bcb, &order[1]);
-	order[0].menu_item = "Fish";
+	Order *order1 = (Order*) malloc(sizeof(Order));
+	order1->menu_item = "Tacos";
+  order1->next = NULL;
+  Order *order2 = malloc(sizeof(Order));
+	order2->menu_item = "Fish";
+  order2->next = NULL;
+	AddOrder(bcb, order1);
+  printf("1 added\n");
+  // order1->next = order2;
+	AddOrder(bcb, order2);
+  // printf("2 added\n");
+  // AddOrder(bcb, &order[1]);
 	// AddOrder(bcb, &order[0]);
 	// order = GetOrder(bcb);
-	// PrintOrders(bcb);
+	PrintOrders(bcb);
 	// printf("%s\n", order->menu_item);
 
   CloseRestaurant(bcb);
