@@ -53,6 +53,13 @@ int main() {
 	bcb = OpenRestaurant(BENSCHILLIBOWL_SIZE, EXPECTED_NUM_ORDERS); 
 	printf("bcb->max_size: %d\n", bcb->max_size);
 	printf("bcb->expected_num_orders: %d\n", bcb->expected_num_orders);
-	free(bcb);
+	Order *order = malloc(sizeof(Order));
+	order->menu_item = "Tacos";
+	AddOrder(bcb, order);
+	order = malloc(sizeof(Order));
+	order->menu_item = "Fish";
+	AddOrder(bcb, order);
+	PrintOrders(bcb);
+	free(bcb); // TODO: free bcb, free orders and all other dynamically allocated memory
   return 0;
 }

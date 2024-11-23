@@ -105,3 +105,13 @@ bool IsFull(BENSCHILLIBOWL* bcb) {
 /* this methods adds order to rear of queue */
 void AddOrderToBack(Order **orders, Order *order) {}
 
+/* prints orders in order list for testing purposes */
+void PrintOrders(BENSCHILLIBOWL* bcb){
+  Order * curr = bcb->orders;
+  int i = 1;
+  while (curr!=NULL){
+    printf("order at position %d: %s\n", i, curr->menu_item);
+    i++;
+    curr = curr->next;
+  }
+}

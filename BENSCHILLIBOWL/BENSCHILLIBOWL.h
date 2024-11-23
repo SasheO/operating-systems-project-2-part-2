@@ -87,4 +87,7 @@ int AddOrder(BENSCHILLIBOWL* mcg, Order* order);
  */
 Order *GetOrder(BENSCHILLIBOWL* mcg);
 
+/* prints orders in order list for testing purposes */
+void PrintOrders(BENSCHILLIBOWL* bcb);
+
 #endif  // LAB3_BENSCHILLIBOWL_H_
