@@ -23,7 +23,6 @@ int BENSCHILLIBOWLMenuLength = 10;
 
 /* Select a random item from the Menu and return it */
 MenuItem PickRandomMenuItem() {
-    srand(time(NULL));
     int menu_item_index = rand()%BENSCHILLIBOWLMenuLength;
     return BENSCHILLIBOWLMenu[menu_item_index];
 }
@@ -59,7 +58,18 @@ BENSCHILLIBOWL* OpenRestaurant(int max_size, int expected_num_orders) {
 /* check that the number of orders received is equal to the number handled (ie.fullfilled). Remember to deallocate your resources */
 
 void CloseRestaurant(BENSCHILLIBOWL* bcb) {
-    printf("Restaurant is closed!\n");
+  // TODO: check that the number of orders received is equal to the number handled (ie.fullfilled)
+  
+  // free all orders
+  Order *next;
+  Order *prev = bcb->orders;
+  while (prev!=NULL){ 
+    next = prev->next;
+    free(prev);
+    prev = next;
+  }
+  free(bcb);
+  printf("Restaurant is closed!\n");
 }
 
 /* add an order to the back of queue */
