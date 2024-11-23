@@ -59,7 +59,9 @@ int main() {
 	order = malloc(sizeof(Order));
 	order->menu_item = "Fish";
 	AddOrder(bcb, order);
+	order = GetOrder(bcb);
 	PrintOrders(bcb);
+	printf("%s\n", order->menu_item);
 	free(bcb); // TODO: free bcb, free orders and all other dynamically allocated memory
   return 0;
 }
