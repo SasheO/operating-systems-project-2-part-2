@@ -59,9 +59,18 @@ BENSCHILLIBOWL* OpenRestaurant(int max_size, int expected_num_orders) {
 
 void CloseRestaurant(BENSCHILLIBOWL* bcb) {
   // TODO: check that the number of orders received is equal to the number handled (ie.fullfilled)
-  
-  // TODO: free all orders and bcb
-  
+  Order * curr = bcb->orders;
+  Order * prev;
+  while (curr!=NULL){
+    prev = curr;
+    curr = curr->next;
+    free(prev);
+    prev = NULL;
+  }
+
+  free(bcb);
+  bcb = NULL;
+    
   printf("Restaurant is closed!\n");
 }
 
@@ -81,7 +90,7 @@ int AddOrder(BENSCHILLIBOWL* bcb, Order* order) {
   }
   
   curr->next = order;
-    return 0;
+  return 0;
 }
 
 /* remove an order from the queue */
