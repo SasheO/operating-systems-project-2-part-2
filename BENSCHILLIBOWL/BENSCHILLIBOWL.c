@@ -116,7 +116,6 @@ Order *GetOrder(BENSCHILLIBOWL* bcb) {
 // Optional helper functions (you can implement if you think they would be useful)
 bool IsEmpty(BENSCHILLIBOWL* bcb) {
   if (bcb->current_size==0){
-    printf("Empty\n");
     return true;
   }
   return false;
@@ -126,7 +125,6 @@ bool IsFull(BENSCHILLIBOWL* bcb) {
   if (bcb->current_size>=bcb->max_size){
     return true;
   }
-    printf("%d<%d\n", bcb->current_size, bcb->max_size);
   return false;
 }
 

@@ -83,16 +83,22 @@ void* BENSCHILLIBOWLCustomer(void* tid) {
 void* BENSCHILLIBOWLCook(void* tid) {
   Order * current_order_handling; 
     int* cook_id = (int*)(long) tid;
+    printf("Cood %d reporting for duty\n", *cook_id);
 	int orders_fulfilled = 0;
-  if (!IsEmpty(bcb)){
-    pthread_mutex_lock(&bcb->mutex);
-    current_order_handling = GetOrder(bcb);
-    printf("Cook %d handled order %d\n", *cook_id, current_order_handling->order_number);
-    orders_fulfilled++;
-    pthread_mutex_unlock(&bcb->mutex); 
+  while(true){
+    if (!IsEmpty(bcb)){ // TODO: make this if statement mutex
+      pthread_mutex_lock(&bcb->mutex);
+      current_order_handling = GetOrder(bcb);
+      printf("Cook %d handled order %d\n", *cook_id, current_order_handling->order_number);
+      orders_fulfilled++;
+      pthread_mutex_unlock(&bcb->mutex); 
+    }
   }
-  // TODO: check if any orders to take. take it (lock it?). increment orders taken.
-	printf("Cook #%d fulfilled %d orders\n", *cook_id, orders_fulfilled);
+  
+    printf("! Cood %d\n", *cook_id);
+
+	
+  printf("Cook #%d fulfilled %d orders\n", *cook_id, orders_fulfilled);
 	return NULL;
 }
  
@@ -105,20 +111,24 @@ void* BENSCHILLIBOWLCook(void* tid) {
  */
 int main() {
   srand(time(NULL));
-  int customer_id, cook_id;
+  int customer_id;
+  int i;
+  int *cook_id;
 	bcb = OpenRestaurant(BENSCHILLIBOWL_SIZE, EXPECTED_NUM_ORDERS); 
   // /*
-  for (cook_id=0; cook_id<NUM_COOKS; cook_id++){
-    pthread_create(&cook_threads[cook_id], NULL, BENSCHILLIBOWLCook, &cook_id); // pass targetCellAddrs[i] into given func such as computeSumCell to carry out the computation (sum) on the cell
+  for (i=0; i<NUM_COOKS; i++){
+    cook_id = malloc(sizeof(int));
+    *cook_id = i;
+    pthread_create(&cook_threads[i], NULL, BENSCHILLIBOWLCook, cook_id); // pass targetCellAddrs[i] into given func such as computeSumCell to carry out the computation (sum) on the cell
   }
   
   for (customer_id=0; customer_id<NUM_CUSTOMERS; customer_id++){
     pthread_create(&customer_threads[customer_id], NULL, BENSCHILLIBOWLCustomer, &customer_id); // pass targetCellAddrs[i] into given func such as computeSumCell to carry out the computation (sum) on the cell    
   }
   
-  for (cook_id=0; cook_id<NUM_COOKS; cook_id++){
-    pthread_join(cook_threads[cook_id], NULL); // wait for thread to finish
-  }
+  // for (cook_id=0; cook_id<NUM_COOKS; cook_id++){
+  //   pthread_join(cook_threads[cook_id], NULL); // wait for thread to finish
+  // }
 
   for (customer_id=0; customer_id<NUM_CUSTOMERS; customer_id++){
     pthread_join(customer_threads[customer_id], NULL); // wait for thread to finish
@@ -139,7 +149,7 @@ int main() {
   
 	// PrintOrders(bcb);
 
-  CloseRestaurant(bcb);
+  // CloseRestaurant(bcb);
  
   return 0;
 }
