@@ -5,7 +5,8 @@
 #include "BENSCHILLIBOWL.h"
 
 /*
-bcb can take 100 customers at a time 
+TODO: implement this as bounded buffer problem (slide 5). 
+bcb can take 100 orders on the queue at a time 
 10 fixed threads for the cooks
 customers come in, place one order after another.
 	- can only come in when less than 100 indoors 
@@ -91,6 +92,8 @@ void* BENSCHILLIBOWLCook(void* tid) {
       current_order_handling = GetOrder(bcb);
       printf("Cook %d handled order %d\n", *cook_id, current_order_handling->order_number);
       orders_fulfilled++;
+      free(current_order_handling);
+      current_order_handling = NULL;
       pthread_mutex_unlock(&bcb->mutex); 
     }
   }

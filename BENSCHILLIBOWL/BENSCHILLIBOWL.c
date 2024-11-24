@@ -64,7 +64,7 @@ void CloseRestaurant(BENSCHILLIBOWL* bcb) {
     curr = next;
   }
   bcb->orders = NULL;
-
+  // TODO: destroy mutex variables
   free(bcb);
   bcb = NULL;  
   printf("Restaurant is closed!\n");
