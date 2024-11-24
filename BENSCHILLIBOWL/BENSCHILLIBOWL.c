@@ -69,8 +69,7 @@ void CloseRestaurant(BENSCHILLIBOWL* bcb) {
   }
 
   free(bcb);
-  bcb = NULL;
-    
+  bcb = NULL;  
   printf("Restaurant is closed!\n");
 }
 
@@ -81,6 +80,8 @@ int AddOrder(BENSCHILLIBOWL* bcb, Order* order) {
   */
   Order * curr = bcb->orders;
   if (curr == NULL){
+    order->order_number = bcb->next_order_number;
+    bcb->next_order_number++;
     bcb->orders = order;
     return 0;
   }
@@ -88,7 +89,8 @@ int AddOrder(BENSCHILLIBOWL* bcb, Order* order) {
   while (curr->next!=NULL){
     curr = curr->next;
   }
-  
+  order->order_number = bcb->next_order_number;
+  bcb->next_order_number++;
   curr->next = order;
   return 0;
 }
@@ -121,10 +123,8 @@ void AddOrderToBack(Order **orders, Order *order) {}
 /* prints orders in order list for testing purposes */
 void PrintOrders(BENSCHILLIBOWL* bcb){
   Order * curr = bcb->orders;
-  int i = 1;
   while (curr!=NULL){
-    printf("order at position %d: %s\n", i, curr->menu_item);
-    i++;
+    printf("order #%d: %s\n", curr->order_number, curr->menu_item);
     curr = curr->next;
   }
 }

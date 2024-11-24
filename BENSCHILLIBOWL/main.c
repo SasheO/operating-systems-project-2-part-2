@@ -110,15 +110,8 @@ int main() {
 	order2->menu_item = "Fish";
   order2->next = NULL;
 	AddOrder(bcb, order1);
-  printf("1 added\n");
-  // order1->next = order2;
 	AddOrder(bcb, order2);
-  // printf("2 added\n");
-  // AddOrder(bcb, &order[1]);
-	// AddOrder(bcb, &order[0]);
-	// order = GetOrder(bcb);
 	PrintOrders(bcb);
-	// printf("%s\n", order->menu_item);
 
   CloseRestaurant(bcb);
  
