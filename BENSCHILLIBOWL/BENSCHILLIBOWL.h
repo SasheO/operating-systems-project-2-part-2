@@ -74,7 +74,7 @@ void CloseRestaurant(BENSCHILLIBOWL* mcg);
  *  - populate the order number of the order
  *  - return the order number
  */
-int AddOrder(BENSCHILLIBOWL* mcg, Order* order);
+bool AddOrder(BENSCHILLIBOWL* mcg, Order* order);
 
 /**
  * Gets an order from the restaurant. This funtion should:
@@ -89,5 +89,9 @@ Order *GetOrder(BENSCHILLIBOWL* mcg);
 
 /* prints orders in order list for testing purposes */
 void PrintOrders(BENSCHILLIBOWL* bcb);
+
+bool IsEmpty(BENSCHILLIBOWL* bcb);
+bool IsFull(BENSCHILLIBOWL* bcb);
+void AddOrderToBack(Order **orders, Order *order);
 
 #endif  // LAB3_BENSCHILLIBOWL_H_

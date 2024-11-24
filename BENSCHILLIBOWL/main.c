@@ -17,9 +17,15 @@ when a cook is free, they get the order.
 
 // Feel free to play with these numbers! This is a great way to
 // test your implementation.
-#define BENSCHILLIBOWL_SIZE 100
-#define NUM_CUSTOMERS 90
-#define NUM_COOKS 10
+// #define BENSCHILLIBOWL_SIZE 100
+// #define NUM_CUSTOMERS 90
+// #define NUM_COOKS 10
+// #define ORDERS_PER_CUSTOMER 3
+// #define EXPECTED_NUM_ORDERS NUM_CUSTOMERS * ORDERS_PER_CUSTOMER
+
+#define BENSCHILLIBOWL_SIZE 10
+#define NUM_CUSTOMERS 9
+#define NUM_COOKS 3
 #define ORDERS_PER_CUSTOMER 3
 #define EXPECTED_NUM_ORDERS NUM_CUSTOMERS * ORDERS_PER_CUSTOMER
 
@@ -40,10 +46,11 @@ pthread_t cook_threads[NUM_COOKS]; // threads that will hold customers. at most 
  */
 void* BENSCHILLIBOWLCustomer(void* tid) {
     int* customer_id = (int*)(long) tid;
-    
+    int orders_added = 0;
     Order *customer_orders;
     customer_orders = (Order*) malloc(sizeof(Order)*ORDERS_PER_CUSTOMER);
     int i;
+    int is_added=false;
     for (i=0;i<ORDERS_PER_CUSTOMER;i++){
       customer_orders[i].menu_item = PickRandomMenuItem();
       customer_orders[i].customer_id = *customer_id;
@@ -51,6 +58,17 @@ void* BENSCHILLIBOWLCustomer(void* tid) {
     }
 
     // TODO: check if BENSCHILLIBOWL_SIZE not reached (isFull?) in terms of order before adding orders one after another here
+    i = 0;
+    while(i<ORDERS_PER_CUSTOMER){ // TODO: change the if to the mutex values
+      is_added = false;
+      pthread_mutex_lock(&bcb->mutex);
+      if(AddOrder(bcb,&customer_orders[i])){
+        i++;
+      }
+      pthread_mutex_unlock(&bcb->mutex); 
+    }
+    
+
 	return NULL;
 }
 
@@ -63,8 +81,16 @@ void* BENSCHILLIBOWLCustomer(void* tid) {
  * receive an order.
  */
 void* BENSCHILLIBOWLCook(void* tid) {
+  Order * current_order_handling; 
     int* cook_id = (int*)(long) tid;
 	int orders_fulfilled = 0;
+  if (!IsEmpty(bcb)){
+    pthread_mutex_lock(&bcb->mutex);
+    current_order_handling = GetOrder(bcb);
+    printf("Cook %d handled order %d\n", *cook_id, current_order_handling->order_number);
+    orders_fulfilled++;
+    pthread_mutex_unlock(&bcb->mutex); 
+  }
   // TODO: check if any orders to take. take it (lock it?). increment orders taken.
 	printf("Cook #%d fulfilled %d orders\n", *cook_id, orders_fulfilled);
 	return NULL;
@@ -81,6 +107,7 @@ int main() {
   srand(time(NULL));
   int customer_id, cook_id;
 	bcb = OpenRestaurant(BENSCHILLIBOWL_SIZE, EXPECTED_NUM_ORDERS); 
+  // /*
   for (cook_id=0; cook_id<NUM_COOKS; cook_id++){
     pthread_create(&cook_threads[cook_id], NULL, BENSCHILLIBOWLCook, &cook_id); // pass targetCellAddrs[i] into given func such as computeSumCell to carry out the computation (sum) on the cell
   }
@@ -96,22 +123,21 @@ int main() {
   for (customer_id=0; customer_id<NUM_CUSTOMERS; customer_id++){
     pthread_join(customer_threads[customer_id], NULL); // wait for thread to finish
   }
+  // */
 
 
-  // TODO check if any free cook?
-    // pthread_join(threads[thread_indx], NULL); // wait for thread to finish
-
-	// printf("bcb->max_size: %d\n", bcb->max_size);
-	// printf("bcb->expected_num_orders: %d\n", bcb->expected_num_orders);
-	Order *order1 = (Order*) malloc(sizeof(Order));
-	order1->menu_item = "Tacos";
-  order1->next = NULL;
-  Order *order2 = malloc(sizeof(Order));
-	order2->menu_item = "Fish";
-  order2->next = NULL;
-	AddOrder(bcb, order1);
-	AddOrder(bcb, order2);
-	PrintOrders(bcb);
+  
+	// Order *order1 = (Order*) malloc(sizeof(Order));
+	// order1->menu_item = "Tacos";
+  // order1->next = NULL;
+  // Order *order2 = malloc(sizeof(Order));
+	// order2->menu_item = "Fish";
+  // order2->next = NULL;
+  // IsEmpty(bcb);
+	// AddOrder(bcb, order1);
+	// AddOrder(bcb, order2);
+  
+	// PrintOrders(bcb);
 
   CloseRestaurant(bcb);
  

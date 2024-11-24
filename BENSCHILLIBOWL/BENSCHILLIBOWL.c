@@ -3,10 +3,6 @@
 #include <stdlib.h>
 #include <time.h> 
 
-bool IsEmpty(BENSCHILLIBOWL* bcb);
-bool IsFull(BENSCHILLIBOWL* bcb);
-void AddOrderToBack(Order **orders, Order *order);
-
 MenuItem BENSCHILLIBOWLMenu[] = { 
     "BensChilli", 
     "BensHalfSmoke", 
@@ -59,14 +55,15 @@ BENSCHILLIBOWL* OpenRestaurant(int max_size, int expected_num_orders) {
 
 void CloseRestaurant(BENSCHILLIBOWL* bcb) {
   // TODO: check that the number of orders received is equal to the number handled (ie.fullfilled)
-  Order * curr = bcb->orders;
-  Order * prev;
-  while (curr!=NULL){
-    prev = curr;
-    curr = curr->next;
-    free(prev);
-    prev = NULL;
+  Order *curr = bcb->orders;
+  Order *next;
+  while (curr != NULL){
+    next = curr->next;
+    free(curr);
+    curr = NULL;
+    curr = next;
   }
+  bcb->orders = NULL;
 
   free(bcb);
   bcb = NULL;  
@@ -74,16 +71,21 @@ void CloseRestaurant(BENSCHILLIBOWL* bcb) {
 }
 
 /* add an order to the back of queue */
-int AddOrder(BENSCHILLIBOWL* bcb, Order* order) {
+bool AddOrder(BENSCHILLIBOWL* bcb, Order* order) {
   /*
-  return 0 if successfully added
+  return true if successfully added, false if no space
   */
+
+  if (IsFull(bcb)){
+    return false;
+  }
   Order * curr = bcb->orders;
   if (curr == NULL){
     order->order_number = bcb->next_order_number;
     bcb->next_order_number++;
     bcb->orders = order;
-    return 0;
+    bcb->current_size++;
+    return true;
   }
 
   while (curr->next!=NULL){
@@ -92,7 +94,8 @@ int AddOrder(BENSCHILLIBOWL* bcb, Order* order) {
   order->order_number = bcb->next_order_number;
   bcb->next_order_number++;
   curr->next = order;
-  return 0;
+  bcb->current_size++;
+  return true;
 }
 
 /* remove an order from the queue */
@@ -102,7 +105,9 @@ Order *GetOrder(BENSCHILLIBOWL* bcb) {
     return NULL;
   }
   else{
+    bcb->current_size--;
     bcb->orders = curr->next;
+    curr->next = NULL;
     return curr;
   }
 
@@ -110,10 +115,18 @@ Order *GetOrder(BENSCHILLIBOWL* bcb) {
 
 // Optional helper functions (you can implement if you think they would be useful)
 bool IsEmpty(BENSCHILLIBOWL* bcb) {
+  if (bcb->current_size==0){
+    printf("Empty\n");
+    return true;
+  }
   return false;
 }
 
 bool IsFull(BENSCHILLIBOWL* bcb) {
+  if (bcb->current_size>=bcb->max_size){
+    return true;
+  }
+    printf("%d<%d\n", bcb->current_size, bcb->max_size);
   return false;
 }
 
