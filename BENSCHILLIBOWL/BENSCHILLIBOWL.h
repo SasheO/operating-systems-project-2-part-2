@@ -92,7 +92,6 @@ void PrintOrders(BENSCHILLIBOWL* bcb);
 
 bool IsEmpty(BENSCHILLIBOWL* bcb);
 bool IsFull(BENSCHILLIBOWL* bcb);
-void AddOrderToBack(Order **orders, Order *order);
 bool WorkdayIsOver(BENSCHILLIBOWL* bcb);
 
 #endif  // LAB3_BENSCHILLIBOWL_H_

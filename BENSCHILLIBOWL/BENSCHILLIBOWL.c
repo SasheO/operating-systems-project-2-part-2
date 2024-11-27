@@ -24,7 +24,6 @@ MenuItem PickRandomMenuItem() {
 }
 
 /* Allocate memory for the Restaurant, then create the mutex and condition variables needed to instantiate the Restaurant */
-
 BENSCHILLIBOWL* OpenRestaurant(int max_size, int expected_num_orders) {
     printf("Restaurant is open!\n");
     BENSCHILLIBOWL *bcb = malloc(sizeof(BENSCHILLIBOWL));
@@ -52,9 +51,12 @@ BENSCHILLIBOWL* OpenRestaurant(int max_size, int expected_num_orders) {
 
 
 /* check that the number of orders received is equal to the number handled (ie.fullfilled). Remember to deallocate your resources */
-
 void CloseRestaurant(BENSCHILLIBOWL* bcb) {
-  // TODO: check that the number of orders received is equal to the number handled (ie.fullfilled)
+  if (!WorkdayIsOver(bcb)){ // only close restaurant if all orders are fulfilled i.e. WorkdayIsOver
+    return;
+  }
+
+  // deallocate all resources (orders queue, mutex variables, bcb)
   Order *curr = bcb->orders;
   Order *next;
   while (curr != NULL){
@@ -64,7 +66,18 @@ void CloseRestaurant(BENSCHILLIBOWL* bcb) {
     curr = next;
   }
   bcb->orders = NULL;
-  // TODO: destroy mutex variables
+  // destroy mutex variables
+  while (pthread_mutex_destroy(&bcb->mutex)!=0){
+    perror("Issue freeing resources");
+  }
+  while (pthread_cond_destroy(&bcb->can_add_orders)!=0){
+    perror("Issue freeing resources");
+    
+  }
+  while (pthread_cond_destroy(&bcb->can_get_orders)!=0){
+    perror("Issue freeing resources");
+    
+  }
   free(bcb);
   bcb = NULL;  
   printf("Restaurant is closed!\n");
@@ -73,14 +86,11 @@ void CloseRestaurant(BENSCHILLIBOWL* bcb) {
 /* add an order to the back of queue */
 bool AddOrder(BENSCHILLIBOWL* bcb, Order* order) {
   /*
-  return true if successfully added, false if no space
+  return true if successfully added, false if not
   */
 
-  // if (IsFull(bcb)){
-  //   return false;
-  // }
   Order * curr = bcb->orders;
-  if (curr == NULL){
+  if (curr == NULL){ // queue is empty. add to the head
     order->order_number = bcb->next_order_number;
     bcb->next_order_number++;
     bcb->orders = order;
@@ -88,7 +98,7 @@ bool AddOrder(BENSCHILLIBOWL* bcb, Order* order) {
     return true;
   }
 
-  while (curr->next!=NULL){
+  while (curr->next!=NULL){ // queue isn't empty so iterate to the last one and add it at the end
     curr = curr->next;
   }
   order->order_number = bcb->next_order_number;
@@ -98,7 +108,7 @@ bool AddOrder(BENSCHILLIBOWL* bcb, Order* order) {
   return true;
 }
 
-/* remove an order from the queue */
+/* remove an order from the queue and return it or return NULL if queue is already empty */
 Order *GetOrder(BENSCHILLIBOWL* bcb) {
   Order *curr = bcb->orders;
   if (curr==NULL){ // edge case where list is empty
@@ -136,10 +146,6 @@ bool WorkdayIsOver(BENSCHILLIBOWL* bcb){
     return false;
   }
 }
-
-
-/* this methods adds order to rear of queue */
-void AddOrderToBack(Order **orders, Order *order) {}
 
 /* prints orders in order list for testing purposes */
 void PrintOrders(BENSCHILLIBOWL* bcb){
