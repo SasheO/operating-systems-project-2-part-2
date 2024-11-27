@@ -53,15 +53,8 @@ pthread_t cook_threads[NUM_COOKS]; // threads that will hold customers. at most 
 void* BENSCHILLIBOWLCustomer(void* tid) {
     int* customer_id = (int*)(long) tid;
     int orders_added = 0;
-    Order *customer_orders;
-    customer_orders = (Order*) malloc(sizeof(Order)*ORDERS_PER_CUSTOMER);
+    Order *customer_order;
     int i;
-    // int is_added=false;
-    for (i=0;i<ORDERS_PER_CUSTOMER;i++){
-      customer_orders[i].menu_item = PickRandomMenuItem();
-      customer_orders[i].customer_id = *customer_id;
-      customer_orders[i].next = NULL;
-    }
 
     i = 0;
     while(i<ORDERS_PER_CUSTOMER){ // TODO: change the if to the mutex values
@@ -72,9 +65,13 @@ void* BENSCHILLIBOWLCustomer(void* tid) {
         pthread_cond_wait(&bcb->can_add_orders, &bcb->mutex);
         
       }
-      if(AddOrder(bcb,&customer_orders[i])){
+      customer_order = malloc(sizeof(Order));
+      customer_order->menu_item = PickRandomMenuItem();
+      customer_order->customer_id = *customer_id;
+      customer_order->next = NULL;
+      if(AddOrder(bcb,customer_order)){
         i++;
-        printf("Customer %d placed order %d\n", *customer_id, customer_orders[i].order_number);
+        printf("Customer %d placed order %d\n", *customer_id, customer_order->order_number);
         pthread_cond_signal(&bcb->can_get_orders);
       }
   
