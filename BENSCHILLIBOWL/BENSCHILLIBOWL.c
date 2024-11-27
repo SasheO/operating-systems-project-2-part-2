@@ -101,15 +101,15 @@ bool AddOrder(BENSCHILLIBOWL* bcb, Order* order) {
 /* remove an order from the queue */
 Order *GetOrder(BENSCHILLIBOWL* bcb) {
   Order *curr = bcb->orders;
-  // if (curr==NULL){ // edge case where list is empty
-  //   return NULL;
-  // }
-  // else{
+  if (curr==NULL){ // edge case where list is empty
+    return NULL;
+  }
+  else{
     bcb->current_size--;
     bcb->orders = curr->next;
     curr->next = NULL;
     return curr;
-  // }
+  }
 
 }
 
@@ -127,6 +127,16 @@ bool IsFull(BENSCHILLIBOWL* bcb) {
   }
   return false;
 }
+
+bool WorkdayIsOver(BENSCHILLIBOWL* bcb){
+  if (bcb->orders_handled>=bcb->expected_num_orders){
+    return true;
+  }
+  else{
+    return false;
+  }
+}
+
 
 /* this methods adds order to rear of queue */
 void AddOrderToBack(Order **orders, Order *order) {}

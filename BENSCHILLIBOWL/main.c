@@ -52,15 +52,12 @@ pthread_t cook_threads[NUM_COOKS]; // threads that will hold customers. at most 
  */
 void* BENSCHILLIBOWLCustomer(void* tid) {
     int* customer_id = (int*)(long) tid;
-    int orders_added = 0;
     Order *customer_order;
     int i;
 
     i = 0;
     while(i<ORDERS_PER_CUSTOMER){ // TODO: change the if to the mutex values
-      // is_added = false;
       pthread_mutex_lock(&bcb->mutex);
-      // TODO: while is full, pthread_cond_wait(&bcb->can_add_orders, &bcb->mutex);
       while(IsFull(bcb)){
         pthread_cond_wait(&bcb->can_add_orders, &bcb->mutex);
         
@@ -74,10 +71,7 @@ void* BENSCHILLIBOWLCustomer(void* tid) {
         printf("Customer %d placed order %d\n", *customer_id, customer_order->order_number);
         pthread_cond_signal(&bcb->can_get_orders);
       }
-  
-        
       pthread_mutex_unlock(&bcb->mutex); 
-
     }
     
 
@@ -98,7 +92,9 @@ void* BENSCHILLIBOWLCook(void* tid) {
   printf("Cood %d reporting for duty\n", *cook_id);
 	int orders_fulfilled = 0;
   int cycles = 0;
-  while(true){
+  
+  // TODO: need to find way to be able to read workday while no one is writing to it
+  while(!(WorkdayIsOver(bcb))){
     // cycles++;
     // TODO: while is empty, pthread_cond_wait(&bcb->can_get_orders, &bcb->mutex);
     pthread_mutex_lock(&bcb->mutex);
@@ -107,20 +103,24 @@ void* BENSCHILLIBOWLCook(void* tid) {
       printf("cook %d cycle waiting to fetch\n", *cook_id);
       pthread_cond_wait(&bcb->can_get_orders, &bcb->mutex);
     }
+    printf("Cook %d ready to go\n",*cook_id);
     
       current_order_handling = GetOrder(bcb);
-      printf("Cook %d handled order %d from customer %d\n", *cook_id, current_order_handling->order_number, current_order_handling->customer_id);
-      orders_fulfilled++;
-      free(current_order_handling);
-      current_order_handling = NULL;
-      pthread_cond_signal(&bcb->can_add_orders);
+      if (current_order_handling!=NULL){
+        printf("Cook %d handled order %d from customer %d\n", *cook_id, current_order_handling->order_number, current_order_handling->customer_id);
+        orders_fulfilled++;
+        free(current_order_handling);
+        current_order_handling = NULL;
+        bcb->orders_handled++;
+        pthread_cond_signal(&bcb->can_add_orders);
+      }
       pthread_mutex_unlock(&bcb->mutex); 
     
-  }
+  }  
   
-  
-  printf("! Cood %d\n", *cook_id);
   printf("Cook #%d fulfilled %d orders\n", *cook_id, orders_fulfilled);
+  pthread_cond_signal(&bcb->can_get_orders); // edge case when last order is fulfilled by cook, so the others do not keep waiting indefinitely for signal
+  printf("Can get orders signalled\n");
 	return NULL;
 }
  
@@ -133,7 +133,7 @@ void* BENSCHILLIBOWLCook(void* tid) {
  */
 int main() {
   srand(time(NULL));
-  int customer_id;
+  int *customer_id;
   int i;
   int *cook_id;
 	bcb = OpenRestaurant(BENSCHILLIBOWL_SIZE, EXPECTED_NUM_ORDERS); 
@@ -144,34 +144,23 @@ int main() {
     pthread_create(&cook_threads[i], NULL, BENSCHILLIBOWLCook, cook_id); // pass targetCellAddrs[i] into given func such as computeSumCell to carry out the computation (sum) on the cell
   }
   
-  for (customer_id=0; customer_id<NUM_CUSTOMERS; customer_id++){
-    pthread_create(&customer_threads[customer_id], NULL, BENSCHILLIBOWLCustomer, &customer_id); // pass targetCellAddrs[i] into given func such as computeSumCell to carry out the computation (sum) on the cell    
+  for (i=0; i<NUM_CUSTOMERS; i++){
+    customer_id = malloc(sizeof(int));
+    *customer_id = i;
+    pthread_create(&customer_threads[i], NULL, BENSCHILLIBOWLCustomer, customer_id); // pass targetCellAddrs[i] into given func such as computeSumCell to carry out the computation (sum) on the cell    
   }
   
-  // for (cook_id=0; cook_id<NUM_COOKS; cook_id++){
-  //   pthread_join(cook_threads[cook_id], NULL); // wait for thread to finish
-  // }
-
-  for (customer_id=0; customer_id<NUM_CUSTOMERS; customer_id++){
-    pthread_join(customer_threads[customer_id], NULL); // wait for thread to finish
+  for (i=0; i<NUM_CUSTOMERS; i++){
+    pthread_join(customer_threads[i], NULL); // wait for thread to finish
+    printf("Customer %d done\n", i);
   }
-  // */
 
+  for (i=0; i<NUM_COOKS; i++){
+    pthread_join(cook_threads[i], NULL); // wait for thread to finish
+    printf("Cood %d done\n", i);
+  } 
 
-  
-	// Order *order1 = (Order*) malloc(sizeof(Order));
-	// order1->menu_item = "Tacos";
-  // order1->next = NULL;
-  // Order *order2 = malloc(sizeof(Order));
-	// order2->menu_item = "Fish";
-  // order2->next = NULL;
-  // IsEmpty(bcb);
-	// AddOrder(bcb, order1);
-	// AddOrder(bcb, order2);
-  
-	// PrintOrders(bcb);
-
-  // CloseRestaurant(bcb);
+  CloseRestaurant(bcb);
  
   return 0;
 }
