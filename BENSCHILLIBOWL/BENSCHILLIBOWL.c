@@ -44,7 +44,7 @@ BENSCHILLIBOWL* OpenRestaurant(int max_size, int expected_num_orders) {
       exit(1);
     } 
     if (pthread_cond_init(&bcb->can_add_orders, NULL) != 0 ||pthread_cond_init(&bcb->can_get_orders, NULL) != 0){
-      perror("pthread_ init has failed\n"); 
+      perror("pthread_cond init has failed\n"); 
       exit(1);
     }
     return bcb;
@@ -76,9 +76,9 @@ bool AddOrder(BENSCHILLIBOWL* bcb, Order* order) {
   return true if successfully added, false if no space
   */
 
-  if (IsFull(bcb)){
-    return false;
-  }
+  // if (IsFull(bcb)){
+  //   return false;
+  // }
   Order * curr = bcb->orders;
   if (curr == NULL){
     order->order_number = bcb->next_order_number;
@@ -101,15 +101,15 @@ bool AddOrder(BENSCHILLIBOWL* bcb, Order* order) {
 /* remove an order from the queue */
 Order *GetOrder(BENSCHILLIBOWL* bcb) {
   Order *curr = bcb->orders;
-  if (curr==NULL){ // edge case where list is empty
-    return NULL;
-  }
-  else{
+  // if (curr==NULL){ // edge case where list is empty
+  //   return NULL;
+  // }
+  // else{
     bcb->current_size--;
     bcb->orders = curr->next;
     curr->next = NULL;
     return curr;
-  }
+  // }
 
 }
 

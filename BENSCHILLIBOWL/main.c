@@ -14,6 +14,11 @@ customers come in, place one order after another.
 when a cook is free, they get the order.
 	- reduce queue (needs mutex for synchronization)
 	- increment orders represented (needs mutex for synchronization)
+  solution using monitors: https://www.geeksforgeeks.org/reader-writer-problem-using-monitors-pthreads/?ref=oin_asr7
+
+
+  not is empty signals can read
+  not is full signals can write
 */
 
 // Feel free to play with these numbers! This is a great way to
@@ -51,22 +56,31 @@ void* BENSCHILLIBOWLCustomer(void* tid) {
     Order *customer_orders;
     customer_orders = (Order*) malloc(sizeof(Order)*ORDERS_PER_CUSTOMER);
     int i;
-    int is_added=false;
+    // int is_added=false;
     for (i=0;i<ORDERS_PER_CUSTOMER;i++){
       customer_orders[i].menu_item = PickRandomMenuItem();
       customer_orders[i].customer_id = *customer_id;
       customer_orders[i].next = NULL;
     }
 
-    // TODO: check if BENSCHILLIBOWL_SIZE not reached (isFull?) in terms of order before adding orders one after another here
     i = 0;
     while(i<ORDERS_PER_CUSTOMER){ // TODO: change the if to the mutex values
-      is_added = false;
+      // is_added = false;
       pthread_mutex_lock(&bcb->mutex);
+      // TODO: while is full, pthread_cond_wait(&bcb->can_add_orders, &bcb->mutex);
+      while(IsFull(bcb)){
+        pthread_cond_wait(&bcb->can_add_orders, &bcb->mutex);
+        
+      }
       if(AddOrder(bcb,&customer_orders[i])){
         i++;
+        printf("Customer %d placed order %d\n", *customer_id, customer_orders[i].order_number);
+        pthread_cond_signal(&bcb->can_get_orders);
       }
+  
+        
       pthread_mutex_unlock(&bcb->mutex); 
+
     }
     
 
@@ -83,24 +97,32 @@ void* BENSCHILLIBOWLCustomer(void* tid) {
  */
 void* BENSCHILLIBOWLCook(void* tid) {
   Order * current_order_handling; 
-    int* cook_id = (int*)(long) tid;
-    printf("Cood %d reporting for duty\n", *cook_id);
+  int* cook_id = (int*)(long) tid;
+  printf("Cood %d reporting for duty\n", *cook_id);
 	int orders_fulfilled = 0;
+  int cycles = 0;
   while(true){
-    if (!IsEmpty(bcb)){ // TODO: make this if statement mutex
-      pthread_mutex_lock(&bcb->mutex);
+    // cycles++;
+    // TODO: while is empty, pthread_cond_wait(&bcb->can_get_orders, &bcb->mutex);
+    pthread_mutex_lock(&bcb->mutex);
+
+    while (IsEmpty(bcb)){ // TODO: make this if statement mutex
+      printf("cook %d cycle waiting to fetch\n", *cook_id);
+      pthread_cond_wait(&bcb->can_get_orders, &bcb->mutex);
+    }
+    
       current_order_handling = GetOrder(bcb);
-      printf("Cook %d handled order %d\n", *cook_id, current_order_handling->order_number);
+      printf("Cook %d handled order %d from customer %d\n", *cook_id, current_order_handling->order_number, current_order_handling->customer_id);
       orders_fulfilled++;
       free(current_order_handling);
       current_order_handling = NULL;
+      pthread_cond_signal(&bcb->can_add_orders);
       pthread_mutex_unlock(&bcb->mutex); 
-    }
+    
   }
   
-    printf("! Cood %d\n", *cook_id);
-
-	
+  
+  printf("! Cood %d\n", *cook_id);
   printf("Cook #%d fulfilled %d orders\n", *cook_id, orders_fulfilled);
 	return NULL;
 }
