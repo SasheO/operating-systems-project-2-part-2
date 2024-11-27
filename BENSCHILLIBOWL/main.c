@@ -89,7 +89,6 @@ void* BENSCHILLIBOWLCustomer(void* tid) {
 void* BENSCHILLIBOWLCook(void* tid) {
   Order * current_order_handling; 
   int* cook_id = (int*)(long) tid;
-  printf("Cood %d reporting for duty\n", *cook_id);
 	int orders_fulfilled = 0;
   int cycles = 0;
   
@@ -99,11 +98,9 @@ void* BENSCHILLIBOWLCook(void* tid) {
     // TODO: while is empty, pthread_cond_wait(&bcb->can_get_orders, &bcb->mutex);
     pthread_mutex_lock(&bcb->mutex);
 
-    while (IsEmpty(bcb)){ // TODO: make this if statement mutex
-      printf("cook %d cycle waiting to fetch\n", *cook_id);
+    while (IsEmpty(bcb) && !(WorkdayIsOver(bcb))){ // TODO: make this if statement mutex
       pthread_cond_wait(&bcb->can_get_orders, &bcb->mutex);
     }
-    printf("Cook %d ready to go\n",*cook_id);
     
       current_order_handling = GetOrder(bcb);
       if (current_order_handling!=NULL){
@@ -120,7 +117,6 @@ void* BENSCHILLIBOWLCook(void* tid) {
   
   printf("Cook #%d fulfilled %d orders\n", *cook_id, orders_fulfilled);
   pthread_cond_signal(&bcb->can_get_orders); // edge case when last order is fulfilled by cook, so the others do not keep waiting indefinitely for signal
-  printf("Can get orders signalled\n");
 	return NULL;
 }
  
@@ -152,12 +148,10 @@ int main() {
   
   for (i=0; i<NUM_CUSTOMERS; i++){
     pthread_join(customer_threads[i], NULL); // wait for thread to finish
-    printf("Customer %d done\n", i);
   }
 
   for (i=0; i<NUM_COOKS; i++){
     pthread_join(cook_threads[i], NULL); // wait for thread to finish
-    printf("Cood %d done\n", i);
   } 
 
   CloseRestaurant(bcb);
