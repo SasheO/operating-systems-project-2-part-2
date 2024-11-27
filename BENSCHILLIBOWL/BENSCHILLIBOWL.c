@@ -37,7 +37,6 @@ BENSCHILLIBOWL* OpenRestaurant(int max_size, int expected_num_orders) {
     bcb->orders_handled=0;
     bcb->current_size=0;
     bcb->next_order_number=1;
-    // TODO: verify that mutex and condition variables are initiated right way
     if (pthread_mutex_init(&bcb->mutex, NULL) != 0) { 
         perror("mutex init has failed\n"); 
       exit(1);

@@ -44,8 +44,8 @@ pthread_t cook_threads[NUM_COOKS]; // threads that will hold customers. at most 
 void* BENSCHILLIBOWLCustomer(void* tid) {
     int* customer_id = (int*)(long) tid;
     Order *customer_order; // needs to be on heap so the same order space does not get allocated to different customers from stack
-    int i = 0;
-    while(i<ORDERS_PER_CUSTOMER){ 
+    int num_customer_orders_placed = 0;
+    while(num_customer_orders_placed<ORDERS_PER_CUSTOMER){ 
       pthread_mutex_lock(&bcb->mutex); // acquire lock
       while(IsFull(bcb)){
         pthread_cond_wait(&bcb->can_add_orders, &bcb->mutex); // wait until <BENSCHILLIBOWL_SIZE orders are on the queue i.e. can add orders 
@@ -55,18 +55,18 @@ void* BENSCHILLIBOWLCustomer(void* tid) {
       customer_order->customer_id = *customer_id;
       customer_order->next = NULL;
       if(AddOrder(bcb,customer_order)){
-        i++;
-        if (i==1){
-          printf("Customer %d placed their %dst order, #%d: %s\n", *customer_id, i, customer_order->order_number, customer_order->menu_item);
+        num_customer_orders_placed++;
+        if (num_customer_orders_placed==1){
+          printf("Customer %d placed their %dst order, #%d: %s\n", *customer_id, num_customer_orders_placed, customer_order->order_number, customer_order->menu_item);
         }
-        else if (i==2){
-          printf("Customer %d placed their %dnd order, #%d: %s\n", *customer_id, i, customer_order->order_number, customer_order->menu_item);
+        else if (num_customer_orders_placed==2){
+          printf("Customer %d placed their %dnd order, #%d: %s\n", *customer_id, num_customer_orders_placed, customer_order->order_number, customer_order->menu_item);
         }
-        else if (i==3){
-          printf("Customer %d placed their %drd order, #%d: %s\n", *customer_id, i, customer_order->order_number, customer_order->menu_item);
+        else if (num_customer_orders_placed==3){
+          printf("Customer %d placed their %drd order, #%d: %s\n", *customer_id, num_customer_orders_placed, customer_order->order_number, customer_order->menu_item);
         }
         else{
-          printf("Customer %d placed their %dth order, #%d: %s\n", *customer_id, i, customer_order->order_number, customer_order->menu_item);
+          printf("Customer %d placed their %dth order, #%d: %s\n", *customer_id, num_customer_orders_placed, customer_order->order_number, customer_order->menu_item);
         }
         
         pthread_cond_signal(&bcb->can_get_orders); // since order has been added, tell cooks they can get orders
@@ -111,7 +111,7 @@ void* BENSCHILLIBOWLCook(void* tid) {
   }  
   
   printf("Cook #%d fulfilled %d orders\n", *cook_id, orders_fulfilled);
-  pthread_cond_signal(&bcb->can_get_orders); // edge case when last order is fulfilled by cook, so the others do not keep waiting indefinitely for signal
+  pthread_cond_signal(&bcb->can_get_orders); // edge case when last order is fulfilled by cook, so the other cooks do not keep waiting indefinitely for signal to get orders
 	return NULL;
 }
  
